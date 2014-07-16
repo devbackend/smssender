@@ -1,6 +1,7 @@
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import javax.print.DocFlavor;
 import java.io.*;
 
 import java.util.ArrayList;
@@ -17,21 +18,8 @@ class Init {
          */
       long before = System.currentTimeMillis();
       /*
-        SmsSender sms = new SmsSender("/dev/ttyUSB0", args[0], args[1]);
-        SimBank simBank = new SimBank("/dev/ttyACM0");
 
-        String number, smsMessage;
-
-        while((number = sms.getNumber()) != null)
-        {
-          smsMessage = sms.getRandomMessage();
-          sms.smsSend(smsMessage, number);
-          System.out.println("На номер " + number + " отправлено сообщение: \"" + smsMessage + "\"");
-          //Thread.sleep(3000);
-        }
-
-      sms.close();
-    */
+      */
 
       File jsonSettings = new File("config.json");
       if(!jsonSettings.exists())
@@ -40,28 +28,61 @@ class Init {
       JSONParser parserJson = new JSONParser();
       JSONObject settings = (JSONObject) parserJson.parse(new FileReader(jsonSettings));
 
-      final long COUNT_BY_SIM          = (long) settings.get("countSmsBySim");
+      String chanelNumber = args[2];
+
+      final long COUNT_BY_SIM          = (long)       settings.get("countSmsBySim");
       final JSONObject SIMBANK_CHANELS = (JSONObject) settings.get("simbankChanels");
       final JSONObject DEVICE_LIST     = (JSONObject) settings.get("chanel2device");
 
       ArrayList<Integer> simList;
-      for(int i=1; i<=SIMBANK_CHANELS.size(); i++)
+      simList = (ArrayList<Integer>) SIMBANK_CHANELS.get(chanelNumber);
+
+      String device = (String) DEVICE_LIST.get(chanelNumber);
+
+
+      /**
+       * todo: собственно отправка сообщений и вся логика здесь будет
+       *
+       */
+
+
+      SmsSender sms = new SmsSender(device, args[0], args[1]);
+
+      String number, smsMessage;
+      int sendedSmsCount = 0;
+      int currentSimKey  = 0;
+
+      while((number = sms.getNumber()) != null)
       {
-        System.out.println(DEVICE_LIST.get("" + i + ""));
-        simList = (ArrayList<Integer>) SIMBANK_CHANELS.get("" + i + "");
-        for(int k=0; k<simList.size(); k++)
+        if(sendedSmsCount%COUNT_BY_SIM == 0)
         {
+          if(currentSimKey == simList.size())
+            break;
+
           /**
-           * todo: собственно отправка сообщений и вся логика здесь будет
-           *
+           * todo: функция на смену симкарты должна принимать int
            */
+          Init.changeSim(Integer.parseInt(chanelNumber), (Number) simList.get(currentSimKey));
+          currentSimKey++;
         }
+
+
+        smsMessage = sms.getRandomMessage();
+        //sms.smsSend(smsMessage, number);
+        System.out.println("На номер " + number + " отправлено сообщение: \"" + smsMessage + "\"");
+        sendedSmsCount++;
       }
 
-
+      sms.close();
 
       long after = System.currentTimeMillis();
       long diff = (after - before)/1000;
 	  System.out.println("Exec in " + diff + " sec");
 	}
+
+    public static void changeSim(int chanel, Number sim) throws Exception {
+      //SimBank simBank = new SimBank("/dev/ttyACM0");
+      //simBank.changeSim(chanel, sim);
+      System.out.println("svb " + chanel + ' ' + sim);
+    }
 }

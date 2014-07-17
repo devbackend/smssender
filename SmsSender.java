@@ -29,12 +29,7 @@ public class SmsSender {
                     SerialPort.STOPBITS_1,
                     SerialPort.PARITY_NONE);
 
-            char c = 0x0D;
-            String str = "AT+CMGF=0"+c;
-            serialPort.writeString(str);
-            Thread.sleep(500); // "засыпаем" на секунду
-
-            serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
+            //serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
             try {
               this.setNumbers(numbers);
               this.setMessages(messages);
@@ -48,7 +43,17 @@ public class SmsSender {
           }
           
      }
-          
+
+  public void restart() throws SerialPortException, InterruptedException {
+    char enter = 0x0D;
+
+    serialPort.writeString("at+cfun=1" + enter);
+    Thread.sleep(21000);
+
+    String str = "at+cmgf=0"+enter;
+    serialPort.writeString(str);
+    Thread.sleep(500); // "засыпаем" на секунду
+  }
      
   //Функция разворачивания номера в нужном формате
   //Телефон в международном формате имеет 11 символов (79231111111)
@@ -119,13 +124,14 @@ public class SmsSender {
                 //Очистим порт
                  serialPort.purgePort(serialPort.PURGE_RXCLEAR | serialPort.PURGE_TXCLEAR);
                  str = "AT+CMGS="+getSMSLength(message)+c;
+
                  serialPort.writeString(str);
                  Thread.sleep(500);
                  serialPort.purgePort(serialPort.PURGE_RXCLEAR | serialPort.PURGE_TXCLEAR);
                  c = 26;//Символ CTRL+Z
                  serialPort.writeString(message+c);
 
-                 Thread.sleep(6000);
+                 Thread.sleep(6500);
              
                  return true;
              }

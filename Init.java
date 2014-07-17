@@ -62,13 +62,13 @@ class Init {
           /**
            * todo: функция на смену симкарты должна принимать int
            */
-          Init.changeSim(Integer.parseInt(chanelNumber), (Number) simList.get(currentSimKey));
+          Init.changeSim(Integer.parseInt(chanelNumber), simList.get(currentSimKey), sms);
           currentSimKey++;
         }
 
 
         smsMessage = sms.getRandomMessage();
-        //sms.smsSend(smsMessage, number);
+        sms.smsSend(smsMessage, number);
         System.out.println("На номер " + number + " отправлено сообщение: \"" + smsMessage + "\"");
         sendedSmsCount++;
       }
@@ -80,9 +80,10 @@ class Init {
 	  System.out.println("Exec in " + diff + " sec");
 	}
 
-    public static void changeSim(int chanel, Number sim) throws Exception {
-      //SimBank simBank = new SimBank("/dev/ttyACM0");
-      //simBank.changeSim(chanel, sim);
-      System.out.println("svb " + chanel + ' ' + sim);
+    public static void changeSim(int chanel, Number sim, SmsSender smsSender) throws Exception {
+      System.out.println("swb " + chanel + " " + sim);
+      SimBank simBank = new SimBank("/dev/ttyACM0");
+      simBank.changeSim(chanel, sim);
+      smsSender.restart();
     }
 }

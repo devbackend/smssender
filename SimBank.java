@@ -21,7 +21,7 @@ public class SimBank {
     }
   }
 
-  public void changeSim(int chanel, int sim) throws SerialPortException {
+  public void changeSim(int chanel, Number sim) throws SerialPortException {
     try {
       //Открываем порт
       serialPort.openPort();

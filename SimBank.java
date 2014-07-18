@@ -21,7 +21,7 @@ public class SimBank {
     }
   }
 
-  public void changeSim(int chanel, Number sim) throws SerialPortException {
+  public void changeSim(int chanel, long sim) throws SerialPortException {
     try {
       //Открываем порт
       serialPort.openPort();
@@ -35,7 +35,7 @@ public class SimBank {
       char enter = 0x0D;
 
       //команда на смену сим-карты
-      String str = "swb " + chanel + " " + sim + enter; //уточнить нужен ли Enter
+      String str = "swb " + chanel + " " + sim + enter;
       serialPort.writeString(str);
 
       Thread.sleep(1000); // "засыпаем" на секунду

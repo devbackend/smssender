@@ -1,3 +1,8 @@
+/**
+ * version 0.97
+ * todo убрать весь хард-код и тогда будет полноценная версия 1.0
+ */
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -12,14 +17,10 @@ class Init {
 		
 		/**
 		 *	1. Скопировать файлики из папки jssc_so в папку /home/{username}/.jssc/linux/
-	     *  todo: остановка при Exception порта
          *  /home/developer/IdeaProjects/jSmsSender/src/messages.txt
          *  /home/developer/IdeaProjects/jSmsSender/src/numbers.txt
          */
       long before = System.currentTimeMillis();
-      /*
-
-      */
 
       File jsonSettings = new File("config.json");
       if(!jsonSettings.exists())
@@ -31,26 +32,20 @@ class Init {
       String chanelNumber = args[2];
 
       final long COUNT_BY_SIM          = (long)       settings.get("countSmsBySim");
+      final long RESTART_LATENCY       = (long) ((JSONObject) settings.get("latency")).get("reloadLatency");
       final JSONObject SIMBANK_CHANELS = (JSONObject) settings.get("simbankChanels");
       final JSONObject DEVICE_LIST     = (JSONObject) settings.get("chanel2device");
 
-      ArrayList<Integer> simList;
-      simList = (ArrayList<Integer>) SIMBANK_CHANELS.get(chanelNumber);
+      ArrayList<Long> simList;
+      simList = (ArrayList<Long>) SIMBANK_CHANELS.get(chanelNumber);
 
       String device = (String) DEVICE_LIST.get(chanelNumber);
-
-
-      /**
-       * todo: собственно отправка сообщений и вся логика здесь будет
-       *
-       */
-
 
       SmsSender sms = new SmsSender(device, args[0], args[1]);
 
       String number, smsMessage;
-      int sendedSmsCount = 0;
-      int currentSimKey  = 0;
+      int sendedSmsCount = 0, currentSimKey  = 0;
+      long currentSimcard;
 
       while((number = sms.getNumber()) != null)
       {
@@ -59,10 +54,8 @@ class Init {
           if(currentSimKey == simList.size())
             break;
 
-          /**
-           * todo: функция на смену симкарты должна принимать int
-           */
-          Init.changeSim(Integer.parseInt(chanelNumber), simList.get(currentSimKey), sms);
+          currentSimcard = simList.get(currentSimKey);
+          Init.changeSim(Integer.parseInt(chanelNumber), currentSimcard, sms, RESTART_LATENCY);
           currentSimKey++;
         }
 
@@ -80,10 +73,10 @@ class Init {
 	  System.out.println("Exec in " + diff + " sec");
 	}
 
-    public static void changeSim(int chanel, Number sim, SmsSender smsSender) throws Exception {
+    public static void changeSim(int chanel, long sim, SmsSender smsSender, long restartLatency) throws Exception {
       System.out.println("swb " + chanel + " " + sim);
       SimBank simBank = new SimBank("/dev/ttyACM0");
       simBank.changeSim(chanel, sim);
-      smsSender.restart();
+      smsSender.restart(restartLatency);
     }
 }

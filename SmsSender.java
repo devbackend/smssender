@@ -44,11 +44,11 @@ public class SmsSender {
           
      }
 
-  public void restart() throws SerialPortException, InterruptedException {
+  public void restart(long restartSleep) throws SerialPortException, InterruptedException {
     char enter = 0x0D;
 
     serialPort.writeString("at+cfun=1" + enter);
-    Thread.sleep(21000);
+    Thread.sleep(restartSleep);
 
     String str = "at+cmgf=0"+enter;
     serialPort.writeString(str);

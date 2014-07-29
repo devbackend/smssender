@@ -42,7 +42,7 @@ class Init {
 
       String device = (String) DEVICE_LIST.get(chanelNumber);
 
-      SmsSender sms = new SmsSender(device, args[0], args[1]);
+      SmsSender sms = new SmsSender(device, args[0], args[1], log);
 
       String number, smsMessage;
       int sendedSmsCount = 0, currentSimKey  = 0;

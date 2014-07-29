@@ -16,8 +16,9 @@ public class SmsSender {
      private static SerialPort serialPort;
      private Stack numbers = new Stack();
      private List<String> messages = new ArrayList<String>();
+     private static ExecutionLogger log;
      
-     public SmsSender(String port, String numbers, String messages) {
+     public SmsSender(String port, String numbers, String messages, ExecutionLogger log) {
           try {
                this.serialPort = new SerialPort(port);
 
@@ -29,10 +30,13 @@ public class SmsSender {
                     SerialPort.STOPBITS_1,
                     SerialPort.PARITY_NONE);
 
-            //serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
+
+            //Устанавливаем ивент лисенер и маску
+            serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
             try {
               this.setNumbers(numbers);
               this.setMessages(messages);
+              this.log = log;
             } catch (Exception e) {
               System.out.println(e.getMessage());
               System.exit(1);
@@ -114,8 +118,6 @@ public class SmsSender {
 
         try {
 
-                 //
-                              
             //Формируем сообщение
             String message = "0011000B91"+reversePhone(phone)+"0008A7"+StringToUSC2(sms);
 
@@ -126,7 +128,6 @@ public class SmsSender {
                 //Очистим порт
                  serialPort.purgePort(serialPort.PURGE_RXCLEAR | serialPort.PURGE_TXCLEAR);
                  str = "AT+CMGS="+getSMSLength(message)+c;
-
                  serialPort.writeString(str);
                  Thread.sleep(500);
                  serialPort.purgePort(serialPort.PURGE_RXCLEAR | serialPort.PURGE_TXCLEAR);
@@ -208,18 +209,19 @@ public class SmsSender {
 
   private static class PortReader implements SerialPortEventListener {
 
-         public void serialEvent(SerialPortEvent event) {
-             if(event.isRXCHAR() && event.getEventValue() > 0){
-                 try {
-                     //Получаем ответ от устройства, обрабатываем данные и т.д.
-                     String data = serialPort.readString(event.getEventValue());
-                     //И снова отправляем запрос
-                     System.out.println(data);
-                 }
-                 catch (SerialPortException ex) {
-                     System.out.println(ex);
-                 }
-             }
-         }
-     }
+    public void serialEvent(SerialPortEvent event) {
+      if(event.isRXCHAR() && event.getEventValue() > 0){
+        try {
+          //Получаем ответ от устройства, обрабатываем данные и т.д.
+          //String data = serialPort.readString(event.getEventValue());
+          System.out.println(serialPort.readString(event.getEventValue()));
+          //И снова отправляем запрос
+          serialPort.writeString("Get data");
+        }
+        catch (SerialPortException ex) {
+          System.out.println(ex);
+        }
+      }
+    }
+  }
 }

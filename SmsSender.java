@@ -53,6 +53,8 @@ public class SmsSender {
     String str = "at+cmgf=0"+enter;
     serialPort.writeString(str);
     Thread.sleep(500); // "засыпаем" на секунду
+
+
   }
      
   //Функция разворачивания номера в нужном формате

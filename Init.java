@@ -1,6 +1,8 @@
 /**
- * version 0.97
- * todo убрать весь хард-код и тогда будет полноценная версия 1.0
+ * jSmsSender - программа для рассылки СМС-сообщений по заданной базе номеров
+ * version 0.99
+ * todo: убрать весь хард-код и тогда будет полноценная версия 1.0
+ * todo: навести порядок в работе, инициализации и объявлении переменных
  */
 
 import org.json.simple.JSONObject;
@@ -15,12 +17,11 @@ class Init {
 	
 	public static void main(String[] args) throws Exception {
 		
-		/**
-		 *	1. Скопировать файлики из папки jssc_so в папку /home/{username}/.jssc/linux/
-         *  /home/developer/IdeaProjects/jSmsSender/src/messages.txt
-         *  /home/developer/IdeaProjects/jSmsSender/src/numbers.txt
-         */
-      long before = System.currentTimeMillis();
+	  long before = System.currentTimeMillis();
+
+      ExecutionLogger log = new ExecutionLogger(Integer.parseInt(args[2]));
+      log.write("-------------------------------------------=Начало работы скрипта=--------------------------------------------------");
+      //System.exit(1);
 
       File jsonSettings = new File("config.json");
       if(!jsonSettings.exists())
@@ -56,12 +57,15 @@ class Init {
 
           currentSimcard = simList.get(currentSimKey);
           Init.changeSim(Integer.parseInt(chanelNumber), currentSimcard, sms, RESTART_LATENCY);
+          log.write("Смена сим-карты на номер " + currentSimcard);
           currentSimKey++;
+          log.write("Перезагрузка модема");
         }
 
 
         smsMessage = sms.getRandomMessage();
         sms.smsSend(smsMessage, number);
+        log.write("На номер " + number + " отправлено сообщение: \"" + smsMessage + "\"");
         System.out.println("На номер " + number + " отправлено сообщение: \"" + smsMessage + "\"");
         sendedSmsCount++;
       }
@@ -70,13 +74,17 @@ class Init {
 
       long after = System.currentTimeMillis();
       long diff = (after - before)/1000;
+      log.write("-------------------------------------------=Конец работы скрипта=--------------------------------------------------");
+      log.write("Время исполнения: " + diff + " сек");
 	  System.out.println("Exec in " + diff + " sec");
 	}
 
     public static void changeSim(int chanel, long sim, SmsSender smsSender, long restartLatency) throws Exception {
+      /*
       System.out.println("swb " + chanel + " " + sim);
       SimBank simBank = new SimBank("/dev/ttyACM0");
       simBank.changeSim(chanel, sim);
       smsSender.restart(restartLatency);
+      */
     }
 }

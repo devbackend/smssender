@@ -40,7 +40,7 @@
     "countSmsBySim" : 25,
     "latency" :
     {
-        "smsSendLatency" : 6000,
+        "smsSendLatency" : 5000,
         "reloadLatency"  : 15000,
     }
 }

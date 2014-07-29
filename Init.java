@@ -16,21 +16,27 @@ import java.util.ArrayList;
 class Init {
 	
 	public static void main(String[] args) throws Exception {
-		
+
+      //начало отсчёта времени исполнения
 	  long before = System.currentTimeMillis();
 
-      ExecutionLogger log = new ExecutionLogger(Integer.parseInt(args[2]));
-      log.write("-------------------------------------------=Начало работы скрипта=--------------------------------------------------");
-      //System.exit(1);
-
+      //файл конфига
       File jsonSettings = new File("config.json");
+
+      //проверяем существует ли файл
       if(!jsonSettings.exists())
         throw new Exception("Путь к файлу с настройками указан неверно!");
 
+      //передаем входные параметры в переменные
+      String filepathToNumbers = args[0], filepathToMessages = args[1], chanelNumber = args[2];
+
+      //открываем для записи файл логов
+      ExecutionLogger log = new ExecutionLogger(Integer.parseInt(chanelNumber));
+      log.write("-------------------------------------------=Начало работы скрипта=--------------------------------------------------");
+
+      //получаем все настройки
       JSONParser parserJson = new JSONParser();
       JSONObject settings = (JSONObject) parserJson.parse(new FileReader(jsonSettings));
-
-      String chanelNumber = args[2];
 
       final long COUNT_BY_SIM          = (long)       settings.get("countSmsBySim");
       final long RESTART_LATENCY       = (long) ((JSONObject) settings.get("latency")).get("reloadLatency");
@@ -41,8 +47,10 @@ class Init {
       simList = (ArrayList<Long>) SIMBANK_CHANELS.get(chanelNumber);
 
       String device = (String) DEVICE_LIST.get(chanelNumber);
+      //настройки получены
 
-      SmsSender sms = new SmsSender(device, args[0], args[1], log);
+      //открываем порт модема
+      SmsSender sms = new SmsSender(device, filepathToNumbers, filepathToMessages, log);
 
       String number, smsMessage;
       int sendedSmsCount = 0, currentSimKey  = 0;

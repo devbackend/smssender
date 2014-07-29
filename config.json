@@ -37,10 +37,10 @@
       "15" : "/dev/ttyUSB14",
       "16" : "/dev/ttyUSB15",
     },
-    "countSmsBySim" : 2,
+    "countSmsBySim" : 25,
     "latency" :
     {
         "smsSendLatency" : 6000,
-        "reloadLatency"  : 20000,
+        "reloadLatency"  : 15000,
     }
 }

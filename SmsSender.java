@@ -34,7 +34,7 @@ public class SmsSender {
 
 
             //Устанавливаем ивент лисенер и маску
-            serialPort.addEventListener(new PortReader(log), SerialPort.MASK_RXCHAR);
+            //serialPort.addEventListener(new PortReader(log), SerialPort.MASK_RXCHAR);
             try {
               this.setNumbers(numbers);
               this.setMessages(messages);

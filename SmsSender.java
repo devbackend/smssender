@@ -120,25 +120,25 @@ public class SmsSender {
     try {
 
       //Формируем сообщение
-      String message = "0011000B91"+reversePhone(phone)+"0008A7"+StringToUSC2(sms);
 
       //Отправляем запрос устройству
 
-      char c = 0x0D;//Символ перевода каретки CR
-      String str;
-      //Очистим порт
-      serialPort.purgePort(serialPort.PURGE_RXCLEAR | serialPort.PURGE_TXCLEAR);
+      char c  = 0x0D; //Символ перевода каретки CR
+      char cz = 26; //Символ CTRL+Z
 
-      str = "AT+CMGS="+getSMSLength(message)+c;
+      String str = "at+cmgf=1";
       serialPort.writeString(str);
-
       Thread.sleep(500);
       serialPort.purgePort(serialPort.PURGE_RXCLEAR | serialPort.PURGE_TXCLEAR);
 
-      c = 26;//Символ CTRL+Z
-      serialPort.writeString(message+c);
+      str = "AT+CMGS="+phone+c;
+      serialPort.writeString(str);
+      Thread.sleep(500);
+      serialPort.purgePort(serialPort.PURGE_RXCLEAR | serialPort.PURGE_TXCLEAR);
 
-      Thread.sleep(5500);
+
+      serialPort.writeString(str+cz);
+      Thread.sleep(4500);
 
       return true;
     }

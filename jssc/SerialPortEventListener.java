@@ -30,5 +30,5 @@ package jssc;
  */
 public interface SerialPortEventListener {
 
-    public abstract void serialEvent(SerialPortEvent serialPortEvent) throws Exception;
+    public abstract void serialEvent(SerialPortEvent serialPortEvent);
 }

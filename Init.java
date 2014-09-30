@@ -1,5 +1,4 @@
 /**
- * jSmsSender - программа для рассылки СМС-сообщений по заданной базе номеров
  * version 0.99
  * todo: убрать весь хард-код и тогда будет полноценная версия 1.0
  * todo: навести порядок в работе, инициализации и объявлении переменных
@@ -16,27 +15,26 @@ import java.util.ArrayList;
 class Init {
 	
 	public static void main(String[] args) throws Exception {
+		
+		/**
+		 *	1. Скопировать файлики из папки jssc_so в папку /home/{username}/.jssc/linux/
+         *  /home/developer/IdeaProjects/jSmsSender/src/messages.txt
+         *  /home/developer/IdeaProjects/jSmsSender/src/numbers.txt
+         */
+      long before = System.currentTimeMillis();
 
-      //начало отсчёта времени исполнения
-	  long before = System.currentTimeMillis();
+      ExecutionLogger log = new ExecutionLogger(Integer.parseInt(args[2]));
+      log.write("-------------------------------------------=Начало работы скрипта=--------------------------------------------------");
+      //System.exit(1);
 
-      //файл конфига
       File jsonSettings = new File("config.json");
-
-      //проверяем существует ли файл
       if(!jsonSettings.exists())
         throw new Exception("Путь к файлу с настройками указан неверно!");
 
-      //передаем входные параметры в переменные
-      String filepathToNumbers = args[0], filepathToMessages = args[1], chanelNumber = args[2];
-
-      //открываем для записи файл логов
-      ExecutionLogger log = new ExecutionLogger(Integer.parseInt(chanelNumber));
-      log.write("-------------------------------------------=Начало работы скрипта=--------------------------------------------------");
-
-      //получаем все настройки
       JSONParser parserJson = new JSONParser();
       JSONObject settings = (JSONObject) parserJson.parse(new FileReader(jsonSettings));
+
+      String chanelNumber = args[2];
 
       final long COUNT_BY_SIM          = (long)       settings.get("countSmsBySim");
       final long RESTART_LATENCY       = (long) ((JSONObject) settings.get("latency")).get("reloadLatency");
@@ -47,10 +45,8 @@ class Init {
       simList = (ArrayList<Long>) SIMBANK_CHANELS.get(chanelNumber);
 
       String device = (String) DEVICE_LIST.get(chanelNumber);
-      //настройки получены
 
-      //открываем порт модема
-      SmsSender sms = new SmsSender(device, filepathToNumbers, filepathToMessages, log);
+      SmsSender sms = new SmsSender(device, args[0], args[1]);
 
       String number, smsMessage;
       int sendedSmsCount = 0, currentSimKey  = 0;
@@ -88,11 +84,9 @@ class Init {
 	}
 
     public static void changeSim(int chanel, long sim, SmsSender smsSender, long restartLatency) throws Exception {
-      /*
       System.out.println("swb " + chanel + " " + sim);
       SimBank simBank = new SimBank("/dev/ttyACM0");
       simBank.changeSim(chanel, sim);
       smsSender.restart(restartLatency);
-      */
     }
 }

@@ -9,8 +9,6 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
-import javax.sound.sampled.Port;
-
 //Класс для отправки смс-сообщений
 
 public class SmsSender {
@@ -18,9 +16,8 @@ public class SmsSender {
      private static SerialPort serialPort;
      private Stack numbers = new Stack();
      private List<String> messages = new ArrayList<String>();
-     private static ExecutionLogger log;
      
-     public SmsSender(String port, String numbers, String messages, ExecutionLogger log) {
+     public SmsSender(String port, String numbers, String messages) {
           try {
                this.serialPort = new SerialPort(port);
 
@@ -32,13 +29,10 @@ public class SmsSender {
                     SerialPort.STOPBITS_1,
                     SerialPort.PARITY_NONE);
 
-
-            //Устанавливаем ивент лисенер и маску
-            //serialPort.addEventListener(new PortReader(log), SerialPort.MASK_RXCHAR);
+            //serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
             try {
               this.setNumbers(numbers);
               this.setMessages(messages);
-              this.log = log;
             } catch (Exception e) {
               System.out.println(e.getMessage());
               System.exit(1);
@@ -120,24 +114,28 @@ public class SmsSender {
     try {
 
       //Формируем сообщение
+      String message = "0011000B91"+reversePhone(phone)+"0008A7"+StringToUSC2(sms);
 
       //Отправляем запрос устройству
 
-      char c  = 0x0D; //Символ перевода каретки CR
-      char cz = 26; //Символ CTRL+Z
-
-      String str = "at+cmgf=1";
-      serialPort.writeString(str);
-      Thread.sleep(500);
+      char c = 0x0D;//Символ перевода каретки CR
+      char cz = 26;//Символ CTRL+Z
+      String str;
+      //Очистим порт
       serialPort.purgePort(serialPort.PURGE_RXCLEAR | serialPort.PURGE_TXCLEAR);
 
-      str = "AT+CMGS="+phone+c;
+      str = "AT+CMGF=1";//+getSMSLength(message)+c;
       serialPort.writeString(str);
-      Thread.sleep(500);
+
+      Thread.sleep(1000);
       serialPort.purgePort(serialPort.PURGE_RXCLEAR | serialPort.PURGE_TXCLEAR);
 
 
-      serialPort.writeString(str+cz);
+      //serialPort.writeString(message+c);
+      serialPort.writeString("AT+CMGS="+phone+c);
+      Thread.sleep(500);
+      serialPort.writeString(message+cz);
+
       Thread.sleep(4500);
 
       return true;
@@ -213,25 +211,18 @@ public class SmsSender {
 
   private static class PortReader implements SerialPortEventListener {
 
-    private static ExecutionLogger log;
-
-    public PortReader(ExecutionLogger log) {
-      PortReader.log = log;
-    }
-
-    public void serialEvent(SerialPortEvent event) throws Exception {
-      if(event.isRXCHAR() && event.getEventValue() > 0){
-        try {
-          //Получаем ответ от устройства, обрабатываем данные и т.д.
-          //String data = serialPort.readString(event.getEventValue());
-          log.write(serialPort.readString(event.getEventValue()));
-          //И снова отправляем запрос
-          serialPort.writeString("Get data");
-        }
-        catch (SerialPortException ex) {
-          System.out.println(ex);
-        }
-      }
-    }
-  }
+         public void serialEvent(SerialPortEvent event) {
+             if(event.isRXCHAR() && event.getEventValue() > 0){
+                 try {
+                     //Получаем ответ от устройства, обрабатываем данные и т.д.
+                     String data = serialPort.readString(event.getEventValue());
+                     //И снова отправляем запрос
+                     System.out.println(data);
+                 }
+                 catch (SerialPortException ex) {
+                     System.out.println(ex);
+                 }
+             }
+         }
+     }
 }
